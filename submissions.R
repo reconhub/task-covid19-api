@@ -1,39 +1,46 @@
-# submissions <- tibble::tibble(
-#   title = character(0),
-#   author = character(0),
-#   body = character(0),
-#   impact = character(0),
-#   timeline = character(0),
-#   priority = character(0),
-#   complexity = character(0),
-#   assignees = character(0),
-#   repo = character(0),
-#   status = character(0),
-#   approver = character(0),
-#   note = character(0),
-#   url = character(0)
-# )
-# 
-# db_con <- connect2DB()
-# RPostgres::dbListTables(db_con)
-# RPostgres::dbWriteTable(db_con, 'submission', submissions)
-# RPostgres::dbGetQuery(db_con, 'alter table submission add id serial;')
-# RPostgres::dbGetQuery(db_con, "alter table submission add created_on timestamp default current_timestamp")
-# RPostgres::dbGetQuery(db_con, "alter table submission add last_update timestamp default current_timestamp")
-# RPostgres::dbReadTable(db_con, 'submission')
-# RPostgres::dbRemoveTable(db_con, "submission")
-# 
-# test <- submitIssue(title = 'myTitle',
-#                     author = 'beemyfriend',
-#                     body = 'myBody',
-#                     impact = "impact",
-#                     timeline = "timeline",
-#                     priority = 'Priority_Low',
-#                     complexity = 'Complexity_Low',
-#                     assignees = 'beemyfriend',
-#                     repo = "ExploreGitAPI")
-# 
-# test2 <- judgeIssue('0bd90cf7bd33424cf726e899dc591a1cd9fca443', 1, 'approved', 'beemyfriend', 'approvingnow')
+submissions <- tibble::tibble(
+  title = character(0),
+  author = character(0),
+  body = character(0),
+  impact = character(0),
+  timeline = character(0),
+  priority = character(0),
+  complexity = character(0),
+  assignees = character(0),
+  repo = character(0),
+  status = character(0),
+  approver = character(0),
+  note = character(0),
+  url = character(0)
+)
+
+db_con <- connect2DB()
+RPostgres::dbListTables(db_con)
+RPostgres::dbWriteTable(db_con, 'submission', submissions)
+RPostgres::dbGetQuery(db_con, 'alter table submission add id serial;')
+RPostgres::dbGetQuery(db_con, "alter table submission add created_on timestamp default current_timestamp")
+RPostgres::dbGetQuery(db_con, "alter table submission add last_update timestamp default current_timestamp")
+RPostgres::dbReadTable(db_con, 'submission')
+RPostgres::dbRemoveTable(db_con, "submission")
+
+test <- submitIssue(title = 'myTitle',
+                    author = 'beemyfriend',
+                    body = 'myBody',
+                    impact = "impact",
+                    timeline = "timeline",
+                    priority = 'Priority_Low',
+                    complexity = 'Complexity_Low',
+                    assignees = 'beemyfriend',
+                    repo = "ExploreGitAPI")
+
+test2 <- judgeIssue('82ed313cf1404842177d20fb313a573b3a3d528f', 
+                    1, 
+                    'approved', 
+                    'beemyfriend', 
+                    'approvingnow',
+                    'Complexity_Low',
+                    'Priority_Low',
+                    'Do not know')
 
 # submit issue for admins to approve
 submitIssue <- function(title,
@@ -107,6 +114,8 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
     print(qry)
     
     info$info <- RPostgres::dbGetQuery(db_con, qry)
+    
+    info$rank <- setRankScore(gitRes$id, gsub('_', ' ', priority))
   }
   
   RPostgres::dbDisconnect(db_con)

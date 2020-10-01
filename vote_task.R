@@ -22,11 +22,11 @@
 # -5 downvote
 # 0 no vote
 # +5 vote
-votes <- tibble::tibble(
-  issue_id = integer(0),
-  username = character(0),
-  vote = integer(0)
-)
+# votes <- tibble::tibble(
+#   issue_id = integer(0),
+#   username = character(0),
+#   vote = integer(0)
+# )
 
 # db_con <- connect2DB()
 # RPostgres::dbRemoveTable(db_con, "votes")
@@ -65,6 +65,20 @@ updateVoteTable <- function(issue_id, username, vote){
   votes <- RPostgres::dbGetQuery(db_con, qry)
   RPostgres::dbDisconnect(db_con)
   return(votes)
+}
+
+setRankScore <- function(issue_id, priority){
+  db_con <- connect2DB()
+  
+  qry <- paste0(
+    "INSERT INTO rank_score(issue_id, score) ",
+    "VALUES ('", 
+    paste(stringr::str_replace_all(c(issue_id, base_scores[[priority]]), "'", "''"),  collapse = "', '"),
+    "') RETURNING *;")
+    
+  res <- RPostgres::dbGetQuery(db_con, qry)
+  
+  return(res)
 }
 
 changeRankScore <- function(issue_id, delta){

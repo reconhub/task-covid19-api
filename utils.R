@@ -5,6 +5,7 @@ id <- ifelse(url_type == 'dev', Sys.getenv("CLIENT_ID_DEV"), Sys.getenv("CLIENT_
 secret <- ifelse(url_type == 'dev', Sys.getenv("CLIENT_SECRET_DEV"), Sys.getenv("CLIENT_SECRET_PROD"))
 pg_auth <- Sys.getenv("PG_AUTH")
 
+#https://gist.github.com/hrbrmstr/45c67103a9728f59212cd13262adca74
 pg <- httr::parse_url(pg_auth)
 
 connect2DB <- function(){
