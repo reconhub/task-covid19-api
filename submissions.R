@@ -1,50 +1,73 @@
-submissions <- tibble::tibble(
-  title = character(0),
-  author = character(0),
-  body = character(0),
-  impact = character(0),
-  timeline = character(0),
-  priority = character(0),
-  complexity = character(0),
-  assignees = character(0),
-  repo = character(0),
-  status = character(0),
-  approver = character(0),
-  note = character(0),
-  url = character(0)
-)
-
-db_con <- connect2DB()
-RPostgres::dbListTables(db_con)
-RPostgres::dbWriteTable(db_con, 'submission', submissions)
-RPostgres::dbGetQuery(db_con, 'alter table submission add id serial;')
-RPostgres::dbGetQuery(db_con, "alter table submission add created_on timestamp default current_timestamp")
-RPostgres::dbGetQuery(db_con, "alter table submission add last_update timestamp default current_timestamp")
-RPostgres::dbReadTable(db_con, 'submission')
-RPostgres::dbRemoveTable(db_con, "submission")
-
-test <- submitIssue(title = 'myTitle',
-                    author = 'beemyfriend',
-                    body = 'myBody',
-                    impact = "impact",
-                    timeline = "timeline",
-                    priority = 'Priority_Low',
-                    complexity = 'Complexity_Low',
-                    assignees = 'beemyfriend',
-                    repo = "ExploreGitAPI")
-
-test2 <- judgeIssue('82ed313cf1404842177d20fb313a573b3a3d528f', 
-                    1, 
-                    'approved', 
-                    'beemyfriend', 
-                    'approvingnow',
-                    'Complexity_Low',
-                    'Priority_Low',
-                    'Do not know')
+# submissions <- tibble::tibble(
+#   title = character(0),
+#   author = character(0),
+#   token = character(0),
+#   body = character(0),
+#   impact = character(0),
+#   timeline = character(0),
+#   priority = character(0),
+#   complexity = character(0),
+#   assignees = character(0),
+#   repo = character(0),
+#   status = character(0),
+#   approver = character(0),
+#   note = character(0),
+#   url = character(0)
+# )
+# 
+# db_con <- connect2DB()
+# RPostgres::dbListTables(db_con)
+# RPostgres::dbWriteTable(db_con, 'submission', submissions)
+# RPostgres::dbGetQuery(db_con, 'alter table submission add id serial;')
+# RPostgres::dbGetQuery(db_con, "alter table submission add created_on timestamp default current_timestamp")
+# RPostgres::dbGetQuery(db_con, "alter table submission add last_update timestamp default current_timestamp")
+# RPostgres::dbReadTable(db_con, 'submission')
+# RPostgres::dbRemoveTable(db_con, "submission")
+# 
+# test <- submitIssue(title = 'myTitle',
+#                     author = 'beemyfriend',
+#                     body = 'myBody',
+#                     impact = "impact",
+#                     timeline = "timeline",
+#                     priority = 'Priority_Low',
+#                     complexity = 'Complexity_Low',
+#                     assignees = 'beemyfriend',
+#                     repo = "ExploreGitAPI",
+#                     token="")
+# 
+# test2 <- judgeIssue('', 
+#                     test$id, 
+#                     'approved', 
+#                     'benjaminortizulloa', 
+#                     'approvingnow',
+#                     'Complexity_Low',
+#                     'Priority_Low',
+#                     'Do not know')
+# 
+# fail <- submitIssue(title = 'myTitle',
+#                     author = 'beemyfriend',
+#                     body = 'myBody',
+#                     impact = "impact",
+#                     timeline = "timeline",
+#                     priority = 'Priority_Low',
+#                     complexity = 'Complexity_Low',
+#                     assignees = 'beemyfriend',
+#                     repo = "ExploreGitAPI",
+#                     token="shouldnotwork")
+# 
+# fail2 <- judgeIssue('', 
+#                     fail$id, 
+#                     'approved', 
+#                     'benjaminortizulloa', 
+#                     'approvingnow',
+#                     'Complexity_Low',
+#                     'Priority_Low',
+#                     'Do not know')
 
 # submit issue for admins to approve
 submitIssue <- function(title,
                         author,
+                        token,
                         body,
                         impact,
                         timeline,
@@ -54,11 +77,11 @@ submitIssue <- function(title,
                         repo
                         ){
   db_con <- connect2DB()
-  print(c(title, author, body, impact, timeline, priority, complexity, assignees, repo, "pending", " "))
+  print(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending", " "))
   qry <- paste0(
-    "INSERT INTO submission(title, author, body, impact, timeline, priority, complexity, assignees, repo, status, note) ",
+    "INSERT INTO submission(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, status, note) ",
     "VALUES ('", 
-    paste(stringr::str_replace_all(c(title, author, body, impact, timeline, priority, complexity, assignees, repo, "pending", " "), "'", "''"),  collapse = "', '"),
+    paste(stringr::str_replace_all(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending", " "), "'", "''"),  collapse = "', '"),
     "') RETURNING *;"
   )
   
@@ -99,13 +122,29 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
                  paste0("[additional notes: ", info$info$note[1], "]"),
                  sep = "\n\n")
     
-    gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+    if(autoFillUser(db_con, token, approver, info$info$author[1])){
+      gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+    } else {
+      gitRes <- postIssue(info$info$token[1], info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+    }
     
-    info$gitRes <- gitRes
+    
+    print(httr::status_code(gitRes))
+    #if attempt to submit issue with original author fails
+    #then submit issue with approver
+    if(httr::status_code(gitRes) != 201){
+      gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+      print(gitRes)
+      print(token)
+    }
+
+    print(gitRes)
+    
+    info$gitRes <- httr::content(gitRes)
     
     qry <- paste0(
       "UPDATE submission ",
-      "SET url = '", gitRes$html_url[1],"', ",
+      "SET url = '", info$gitRes$html_url[1],"', ",
       "last_update = current_timestamp ",
       "WHERE id = ", id," RETURNING *;"
     )
@@ -113,9 +152,11 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
     print('update url')
     print(qry)
     
-    info$info <- RPostgres::dbGetQuery(db_con, qry)
     
-    info$rank <- setRankScore(gitRes$id, gsub('_', ' ', priority))
+    
+    info$info <- RPostgres::dbGetQuery(db_con, qry)
+
+    info$rank <- setRankScore(info$gitRes$id, gsub('_', ' ', priority))
   }
   
   RPostgres::dbDisconnect(db_con)
@@ -162,13 +203,10 @@ postIssue <- function(token,title, body, priority, complexity, assignees){
   
   bdy <- jsonlite::toJSON(bdy, auto_unbox = T)
   
-  print('body')
-  print(bdy)
-  
   url = paste0("https://api.github.com/repos/", owner, "/", repo, "/issues")
-  print(url)
-  
+
   tkn = paste('token', token)
   postres <- httr::POST(url, httr::add_headers(Authorization = tkn), body = bdy)
-  httr::content(postres)
+  
+  return(postres)
 }

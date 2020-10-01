@@ -9,9 +9,11 @@
 # RPostgres::dbGetQuery(db_con, "alter table admin add created_on timestamp default current_timestamp")
 # RPostgres::dbGetQuery(db_con, "alter table admin add last_update timestamp default current_timestamp")
 # RPostgres::dbReadTable(db_con, 'admin')
-
-# test <- addAuthorization('0bd90cf7bd33424cf726e899dc591a1cd9fca443', 'benjaminortizulloa', 'beemyfriend', 'admin')
-# test2 <- editAuthorization('0bd90cf7bd33424cf726e899dc591a1cd9fca443', 'benjaminortizulloa', 'beemyfriend', 'reviewer')
+#
+#DELETE FROM tasks WHERE status = 'DONE' RETURNING *;
+# 
+# test <- addAuthorization('', 'benjaminortizulloa', 'beemyfriend', 'admin')
+# test2 <- editAuthorization('', 'benjaminortizulloa', 'beemyfriend', 'reviewer')
 # test3 <- getAuthorization('beemyfriend')
 # test4 <- getAuthorization()
 
@@ -26,12 +28,19 @@ pullAuthorization <- function(db_con, user){
   return(info)
 }
 
+autoFillUser <- function(db_con,token, admin, user){
+  if(nrow(pullAuthorization(db_con, user))){
+    return(FALSE)
+  } 
+  confirm <- addAuthorization(token, admin, user, 'user')
+  print(confirm)
+  return(TRUE)
+}
+
 #Need admin rights to main project
 #will use personal for now
 addGitCollab <- function(token, username, type){
-  print('addGitCollab')
-  
-  permission <- "pull"
+  permission <- "push"
   
   if(type == 'admin' | type == "reviewer"){
     permission <- "admin"
@@ -78,7 +87,7 @@ removeGitCollab <- function(token, username){
 
 # reviewer can approve issues and assign issues
 # admin same as reviewer but can add new reviewer admin
-# user is default...no priveledges
+# user is default...push priveledges
 addAuthorization <- function(token, admin, user, type){
   db_con <- connect2DB()
   
@@ -119,7 +128,7 @@ editAuthorization <- function(token, admin, user, type){
   
   RPostgres::dbDisconnect(db_con)
   
-  if(type == 'user'){
+  if(type == 'nothing'){
     removeGitCollab(token, user)
   } else {
     addGitCollab(token, user, type)

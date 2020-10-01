@@ -47,6 +47,7 @@ editAuthorization
 #' @param complexity Complexity_Low, Complexity_Medium, Complexity_High
 #' @param assignees single string for potential help
 #' @param repo potential repo for task
+#' @param token GitHub user token of person submitting task
 submitIssue
 
 #' @post /judgeIssue
