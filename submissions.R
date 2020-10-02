@@ -114,13 +114,13 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
   info <- list(info = info)
   
   if(status == 'approved'){
-    bdy <- paste(info$info$body[1], 
+    bdy <- paste(paste(info$info$body[1], "\n"), 
                  paste0("[impact: ", info$info$impact[1], "]"), 
                  paste0("[timeline: ", info$info$timeline[1], "]" ),
                  paste0("[originally proposed by @", info$info$author[1], "]"),
                  paste0("[suggested repo: ", info$info$repo[1], "]"),
                  paste0("[additional notes: ", info$info$note[1], "]"),
-                 sep = "\n\n")
+                 sep = "\n")
     
     if(autoFillUser(db_con, token, approver, info$info$author[1])){
       gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
