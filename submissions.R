@@ -23,7 +23,7 @@
 # RPostgres::dbGetQuery(db_con, "alter table submission add last_update timestamp default current_timestamp")
 # RPostgres::dbReadTable(db_con, 'submission')
 # RPostgres::dbRemoveTable(db_con, "submission")
-# 
+
 # test <- submitIssue(title = 'myTitle',
 #                     author = 'beemyfriend',
 #                     body = 'myBody',
@@ -190,9 +190,9 @@ myIssues <- function(user){
 }
 
 postIssue <- function(token,title, body, priority, complexity, assignees){
-  #eventually assign task to assigned repos, but for now we will use benjaminortizulloa/ExploreGitAPI
-  owner = "benjaminortizulloa"
-  repo = "ExploreGitAPI"
+  #eventually assign task to assigned repos, but for now we will use reconhub/suggested-packages
+  owner = "reconhub"
+  repo = "suggested-packages"
   print('postIssue')
   
   bdy <- list(title = title, body = body, labels = c(priority, complexity))

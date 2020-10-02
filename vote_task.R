@@ -7,7 +7,11 @@
 #   issue_id = tasks$id,
 #   score = vapply(tasks$priority, function(x) base_scores[[x]], double(1))
 # )
-# 
+# rank_score <- tibble::tibble(
+#   issue_id = integer(0),
+#   score = integer(0)
+# )
+#  
 # db_con <- connect2DB()
 # RPostgres::dbRemoveTable(db_con, "rank_score")
 # RPostgres::dbListTables(db_con)
@@ -27,7 +31,7 @@
 #   username = character(0),
 #   vote = integer(0)
 # )
-
+# 
 # db_con <- connect2DB()
 # RPostgres::dbRemoveTable(db_con, "votes")
 # RPostgres::dbListTables(db_con)
