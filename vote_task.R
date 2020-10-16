@@ -122,6 +122,7 @@ voteTasks <- function(issue_id, username, vote){
     username, 
     "'"
   )
+  
   originalScore <- RPostgres::dbGetQuery(db_con, qry_orig)$vote
   originalScore <- ifelse(length(originalScore), originalScore, 0)
   
@@ -131,6 +132,14 @@ voteTasks <- function(issue_id, username, vote){
   delta <- newVote$vote - originalScore
   
   newRank <- changeRankScore(issue_id, delta)
+  
+  qry_max_score <- paste0(
+    "SELECT score FROM rank_score ",
+    "WHERE score = (SELECT MAX (score) FROM rank_score);"
+  )
+  
+  maxScore <- RPostgres::dbGetQuery(db_con, qry_max_score)$score[1]
+  print(maxScore)
   RPostgres::dbDisconnect(db_con)
-  return(list(newRank = newRank, newVote = newVote))
+  return(list(newRank = newRank, newVote = newVote, maxScore = maxScore))
 }

@@ -77,11 +77,11 @@ submitIssue <- function(title,
                         repo
                         ){
   db_con <- connect2DB()
-  print(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending", " "))
+  print(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "))
   qry <- paste0(
     "INSERT INTO submission(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, status, note) ",
     "VALUES ('", 
-    paste(stringr::str_replace_all(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending", " "), "'", "''"),  collapse = "', '"),
+    paste(stringr::str_replace_all(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "), "'", "''"),  collapse = "', '"),
     "') RETURNING *;"
   )
   
