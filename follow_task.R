@@ -86,6 +86,8 @@ serveTasks <- function(user=NA){
     )
   }
   
+  RPostgres::dbDisconnect(db_con)
+  
   return(tasks)
 }
   

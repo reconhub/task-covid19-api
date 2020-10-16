@@ -7,4 +7,6 @@ backup_db <- function(){
     tbl <- RPostgres::dbReadTable(db_con, nm)
     readr::write_csv(tbl, paste0('backup/', now, '_', nm, '.csv'))
   })
+  
+  RPostgres::dbDisconnect(db_con)
 }

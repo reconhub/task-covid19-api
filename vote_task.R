@@ -81,7 +81,7 @@ setRankScore <- function(issue_id, priority){
     "') RETURNING *;")
     
   res <- RPostgres::dbGetQuery(db_con, qry)
-  
+  RPostgres::dbDisconnect(db_con)
   return(res)
 }
 
@@ -107,6 +107,7 @@ changeRankScore <- function(issue_id, delta){
   )
   
   updated_issue <- RPostgres::dbGetQuery(db_con, qry)
+  RPostgres::dbDisconnect(db_con)
   return(updated_issue)
 }
 
@@ -130,6 +131,6 @@ voteTasks <- function(issue_id, username, vote){
   delta <- newVote$vote - originalScore
   
   newRank <- changeRankScore(issue_id, delta)
-  
+  RPostgres::dbDisconnect(db_con)
   return(list(newRank = newRank, newVote = newVote))
 }
