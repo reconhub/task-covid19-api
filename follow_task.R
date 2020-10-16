@@ -57,6 +57,7 @@ serveTasks <- function(user=NA){
   tasks <- parseIssues(cnt)
   rank_score <- RPostgres::dbGetQuery(db_con, "SELECT issue_id, score FROM rank_score")
   tasks <- dplyr::left_join(tasks, rank_score, by = c('id' = 'issue_id'))
+  tasks <- dplyr::mutate(tasks, perc_score = round(score/max(score) * 100))
   tasks <- dplyr::arrange(tasks, desc(score))
   
   if(!is.na(user)){
