@@ -9,15 +9,20 @@
 # RPostgres::dbGetQuery(db_con, "alter table recon_package add last_update timestamp default current_timestamp")
 # RPostgres::dbDisconnect(db_con)
 
-recon_packages <- function(){
+recon_packages <- function(pkg = NA){
   db_con <- connect2DB()
   
-  qry <- paste0("SELECT * FROM recon_package")
+  if(is.na(pkg)){
+    qry <- paste0("SELECT * FROM recon_package")
+  } else {
+    info <- unlist(stringr::str_split(pkg, '/'))
+    qry <- paste0("SELECT * FROM recon_package WHERE org = '", info[1], "' AND repo = '", info[2], "'")
+  }
   
-  pkg <- RPostgres::dbGetQuery(db_con, qry)
-  pkg <- dplyr::arrange(pkg, repo)
+  dta <- RPostgres::dbGetQuery(db_con, qry)
+  dta <- dplyr::arrange(dta, repo)
   
   RPostgres::dbDisconnect(db_con)
   
-  return(pkg)
+  return(dta)
 }

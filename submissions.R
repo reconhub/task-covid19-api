@@ -113,12 +113,22 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
   info <- RPostgres::dbGetQuery(db_con, qry)
   info <- list(info = info)
   
+  rep_info <- ""
+  
+  if(info$info$repo[1] == 'Do not know'){
+    rep_info <- info$info$repo[1]
+  } else {
+    rep_info <- recon_packages(info$info$repo[1])
+    rep_info <- paste0('https://github.com/', info$info$repo[1], ' | @', rep_info$poc)
+  }
+    
+    paste0('github.com/', info$info$repo[1])
   if(status == 'approved'){
     bdy <- paste(paste(info$info$body[1], "\n"), 
                  paste0("[impact: ", info$info$impact[1], "]"), 
                  # paste0("[timeline: ", info$info$timeline[1], "]" ),
                  paste0("[originally proposed by @", info$info$author[1], "]"),
-                 paste0("[suggested repo: ", info$info$repo[1], "]"),
+                 paste0("[suggested repo: ", rep_info, "]"),
                  paste0("[additional notes: ", info$info$note[1], "]"),
                  sep = "\n")
     
