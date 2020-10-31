@@ -6,6 +6,7 @@ source('auth_db.R')
 source('submissions.R')
 source('follow_task.R')
 source('vote_task.R')
+source('recon_packages.R')
 
 #* @filter cors
 cors <- function(res) {
@@ -84,6 +85,9 @@ followTasks
 #' @param username
 #' @param vote
 voteTasks
+
+#' @get /pkgs
+recon_packages
 
 #' @serializer unboxedJSON
 #' @get /test
