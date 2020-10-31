@@ -122,21 +122,24 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
                  paste0("[additional notes: ", info$info$note[1], "]"),
                  sep = "\n")
     
-    if(autoFillUser(db_con, token, approver, info$info$author[1])){
-      gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
-    } else {
-      gitRes <- postIssue(info$info$token[1], info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
-    }
+    ## this was only useful if we were going to add comments directly from suggesting user
+    ## to avoid hassle of adding auth to random users [for tagging] we will only care about explicitly added users
+    # if(autoFillUser(db_con, token, approver, info$info$author[1])){
+    #   gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+    # } else {
+    #   gitRes <- postIssue(info$info$token[1], info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+    # }
     
+    gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
     
     print(httr::status_code(gitRes))
-    #if attempt to submit issue with original author fails
-    #then submit issue with approver
-    if(httr::status_code(gitRes) != 201){
-      gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
-      print(gitRes)
-      print(token)
-    }
+    # #if attempt to submit issue with original author fails
+    # #then submit issue with approver
+    # if(httr::status_code(gitRes) != 201){
+    #   gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
+    #   print(gitRes)
+    #   print(token)
+    # }
 
     print(gitRes)
     
