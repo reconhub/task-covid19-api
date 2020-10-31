@@ -54,7 +54,7 @@ addGitCollab <- function(token, username, type){
   bdy <- jsonlite::toJSON(list(permission = permission), auto_unbox = T)
   print(bdy)
   
-  url = paste0("https://api.github.com/repos/", "reconhub", "/", "suggested-packages", "/collaborators/", username)
+  url = paste0("https://api.github.com/repos/", "reconhub", "/", "tasks", "/collaborators/", username)
   print(url)
   
   tkn = paste('token', token)
@@ -72,7 +72,7 @@ addGitCollab <- function(token, username, type){
 }
 
 removeGitCollab <- function(token, username){
-  url = paste0("https://api.github.com/repos/", "reconhub", "/", "suggested-packages", "/collaborators/", username)
+  url = paste0("https://api.github.com/repos/", "reconhub", "/", "tasks", "/collaborators/", username)
   print(url)
   
   tkn = paste('token', token)

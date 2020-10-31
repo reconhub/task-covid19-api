@@ -116,7 +116,7 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
   if(status == 'approved'){
     bdy <- paste(paste(info$info$body[1], "\n"), 
                  paste0("[impact: ", info$info$impact[1], "]"), 
-                 paste0("[timeline: ", info$info$timeline[1], "]" ),
+                 # paste0("[timeline: ", info$info$timeline[1], "]" ),
                  paste0("[originally proposed by @", info$info$author[1], "]"),
                  paste0("[suggested repo: ", info$info$repo[1], "]"),
                  paste0("[additional notes: ", info$info$note[1], "]"),
@@ -190,9 +190,9 @@ myIssues <- function(user){
 }
 
 postIssue <- function(token,title, body, priority, complexity, assignees){
-  #eventually assign task to assigned repos, but for now we will use reconhub/suggested-packages
+  #eventually assign task to assigned repos, but for now we will use reconhub/tasks
   owner = "reconhub"
-  repo = "suggested-packages"
+  repo = "tasks"
   print('postIssue')
   
   bdy <- list(title = title, body = body, labels = c(priority, complexity))

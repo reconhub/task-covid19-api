@@ -52,7 +52,7 @@ parseIssues <- function(dta) {
 serveTasks <- function(user=NA){
   db_con <- connect2DB()
   
-  res <- httr::GET('https://api.github.com/repos/reconhub/suggested-packages/issues')
+  res <- httr::GET('https://api.github.com/repos/reconhub/tasks/issues')
   cnt <- httr::content(res)
   tasks <- parseIssues(cnt)
   rank_score <- RPostgres::dbGetQuery(db_con, "SELECT issue_id, score FROM rank_score")
