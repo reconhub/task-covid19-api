@@ -85,8 +85,6 @@ submitIssue <- function(title,
     "') RETURNING *;"
   )
   
-  print(qry)
-  
   info <- RPostgres::dbGetQuery(db_con, qry)
   
   RPostgres::dbDisconnect(db_con)
@@ -118,7 +116,7 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
   if(info$info$repo[1] == 'Do not know'){
     rep_info <- info$info$repo[1]
   } else {
-    rep_info <- recon_packages(info$info$repo[1])
+    rep_info <- recon_packages(pkg = info$info$repo[1])
     rep_info <- paste0('https://github.com/', info$info$repo[1], ' | @', rep_info$poc)
   }
     

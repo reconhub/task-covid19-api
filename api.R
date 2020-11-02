@@ -107,7 +107,23 @@ followTasks
 voteTasks
 
 #' @get /pkgs
+#' @param status
 recon_packages
+
+#' @post /suggestPkg
+#' @param org
+#' @param pkg
+#' @param poc
+#' @param user
+#' @param token
+suggestPackages
+
+#' @post /editPkg
+#' @param id
+#' @param status
+#' @param user
+#' @param token
+editPackages
 
 #' @serializer unboxedJSON
 #' @get /test
