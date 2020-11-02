@@ -54,41 +54,46 @@ serveTasks <- function(user=NA, token){
   
   res <- httr::GET('https://api.github.com/repos/reconhub/tasks/issues')
   cnt <- httr::content(res)
-  tasks <- parseIssues(cnt)
-  rank_score <- RPostgres::dbGetQuery(db_con, "SELECT issue_id, score FROM rank_score")
-  tasks <- dplyr::left_join(tasks, rank_score, by = c('id' = 'issue_id'))
-  tasks <- dplyr::mutate(tasks, perc_score = round(score/max(score) * 100))
-  tasks <- dplyr::arrange(tasks, desc(score))
   
-  if(!is.na(user)){
-    qry_follow <- paste0(
-      "SELECT issue_id, status FROM following WHERE username = '",
-      user,
-      "'"
-    )
+  if(length(cnt) > 0){
+    tasks <- parseIssues(cnt)
+    rank_score <- RPostgres::dbGetQuery(db_con, "SELECT issue_id, score FROM rank_score")
+    tasks <- dplyr::left_join(tasks, rank_score, by = c('id' = 'issue_id'))
+    tasks <- dplyr::mutate(tasks, perc_score = round(score/max(score) * 100))
+    tasks <- dplyr::arrange(tasks, desc(score))
     
-    qry_vote <- paste0(
-      "SELECT issue_id, vote FROM votes WHERE username = '",
-      user, 
-      "'"
-    )
+    if(!is.na(user)){
+      qry_follow <- paste0(
+        "SELECT issue_id, status FROM following WHERE username = '",
+        user,
+        "'"
+      )
+      
+      qry_vote <- paste0(
+        "SELECT issue_id, vote FROM votes WHERE username = '",
+        user, 
+        "'"
+      )
+      
+      following <- RPostgres::dbGetQuery(db_con, qry_follow)
+      votes <- RPostgres::dbGetQuery(db_con, qry_vote)
+      
+      tasks <- dplyr::left_join(tasks, following, by = c('id' = 'issue_id'))
+      tasks <- dplyr::left_join(tasks, votes, by = c("id" = "issue_id"))
+  
+      tasks <- dplyr::mutate(
+        tasks, 
+        status = replace(status, is.na(status), F),
+        vote = replace(vote, is.na(vote), F)
+      )
+    }
     
-    following <- RPostgres::dbGetQuery(db_con, qry_follow)
-    votes <- RPostgres::dbGetQuery(db_con, qry_vote)
+    RPostgres::dbDisconnect(db_con)
     
-    tasks <- dplyr::left_join(tasks, following, by = c('id' = 'issue_id'))
-    tasks <- dplyr::left_join(tasks, votes, by = c("id" = "issue_id"))
-
-    tasks <- dplyr::mutate(
-      tasks, 
-      status = replace(status, is.na(status), F),
-      vote = replace(vote, is.na(vote), F)
-    )
+    return(tasks)
   }
   
-  RPostgres::dbDisconnect(db_con)
-  
-  return(tasks)
+  return(list())
 }
   
 #last_update isn't updating...
