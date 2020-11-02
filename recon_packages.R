@@ -1,5 +1,6 @@
 # db_con <- connect2DB()
 # recon_packages <- read.csv('data/recon_packages.csv', stringsAsFactors = F)
+# recon_packages$proposed_by <- 'benjaminortizulloa'
 # recon_packages$approved_by <- 'benjaminortizulloa'
 # recon_packages$status <- 'approved'
 # RPostgres::dbRemoveTable(db_con, "recon_package")
@@ -32,7 +33,7 @@ suggestPackages <- function(org, pkg, poc, user){
   db_con <- connect2DB()
   
   qry <- paste0(
-    "INSERT INTO recon_package(org, repo, poc, approved_by, status) ",
+    "INSERT INTO recon_package(org, repo, poc, proposed_by, status) ",
     "VALUES ('", 
     paste(stringr::str_replace_all(c(org, pkg, poc, user, "pending validation"), "'", "''"),  collapse = "', '"),
     "') RETURNING *;"
