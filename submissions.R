@@ -66,7 +66,7 @@
 
 # submit issue for admins to approve
 submitIssue <- function(title,
-                        author,
+                        user,
                         token,
                         body,
                         impact,
@@ -77,11 +77,11 @@ submitIssue <- function(title,
                         repo
                         ){
   db_con <- connect2DB()
-  print(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "))
+  print(c(title, user, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "))
   qry <- paste0(
     "INSERT INTO submission(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, status, note) ",
     "VALUES ('", 
-    paste(stringr::str_replace_all(c(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "), "'", "''"),  collapse = "', '"),
+    paste(stringr::str_replace_all(c(title, user, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "), "'", "''"),  collapse = "', '"),
     "') RETURNING *;"
   )
   
@@ -95,13 +95,13 @@ submitIssue <- function(title,
 }
 
 # approve or reject submitted issues
-judgeIssue <- function(token, id, status, approver, note, complexity, priority, repo){
+judgeIssue <- function(token, id, status, user, note, complexity, priority, repo){
   db_con <- connect2DB()
   
   qry <- paste0(
     "UPDATE submission ",
     "SET status = '", status,"', ",
-    "approver = '", approver,"', ",
+    "approver = '", user,"', ",
     "note = '", stringr::str_replace_all(note, "'", "''"),"', ",
     "complexity = '", complexity, "', ",
     "priority = '", priority, "', ",
@@ -178,7 +178,7 @@ judgeIssue <- function(token, id, status, approver, note, complexity, priority, 
 }
 
 #' get issues by status
-issues <- function(status){
+issues <- function(status, user, token){
   db_con <- connect2DB()
   
   qry <- paste0("SELECT * FROM submission WHERE status = '", status, "'")
@@ -190,7 +190,7 @@ issues <- function(status){
   return(statuses)
 }
 
-myIssues <- function(user){
+myIssues <- function(user, token){
   db_con <- connect2DB()
   
   qry <- paste0("SELECT * FROM submission WHERE author = '", user, "'")

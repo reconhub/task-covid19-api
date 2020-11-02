@@ -111,7 +111,7 @@ changeRankScore <- function(issue_id, delta){
   return(updated_issue)
 }
 
-voteTasks <- function(issue_id, username, vote){
+voteTasks <- function(issue_id, user, vote){
   db_con <- connect2DB()
   if(!vote %in% names(score_card)) return('Please choose appropriate vote')
   
@@ -119,14 +119,14 @@ voteTasks <- function(issue_id, username, vote){
     "SELECT * FROM votes WHERE issue_id = ",
     issue_id,
     " AND username = '",
-    username, 
+    user, 
     "'"
   )
   
   originalScore <- RPostgres::dbGetQuery(db_con, qry_orig)$vote
   originalScore <- ifelse(length(originalScore), originalScore, 0)
   
-  newVote <- updateVoteTable(issue_id, username, vote)
+  newVote <- updateVoteTable(issue_id, user, vote)
   
   #necessary if thumbs up to thumbs down delta will be |10| not |5|
   delta <- newVote$vote - originalScore

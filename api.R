@@ -9,10 +9,23 @@ source('vote_task.R')
 source('recon_packages.R')
 
 #* @filter cors
-cors <- function(res) {
+cors <- function(req, res) {
   res$setHeader("Access-Control-Allow-Origin", "*")
+  
+  usr <- req$args$user
+  tkn <- req$args$token
+  
+  if(!is.null(req$args$user)){
+    if(!validateUser(usr, tkn)){
+      res$status <- 401 # Unauthorized
+      return(list(error="Authentication required [Need user name and token]"))
+    } 
+  }
+
   plumber::forward()
 }
+
+
 
 #' @get /my-oauth
 #' @param code
@@ -21,26 +34,27 @@ gitOauth
 
 #' @post /addAuth
 #' @param token GitHup user token
-#' @param admin admin who is submittint a new user
-#' @param user github handle of new user
+#' @param user admin who is submittint a new user
+#' @param login github handle of new user
 #' @param type type of authorization [admin, reviewer, user]
 addAuthorization
   
 #' @get /auth
 #' @serializer unboxedJSON
-#' @param email
+#' @param user
+#' @param token
 getAuthorization
 
 #' @post /editAuth
 #' @param token GitHub user token
-#' @param admin admin who is edditing user role
-#' @param user github handle of user whose role is being edite
+#' @param user admin who is edditing user role
+#' @param login github handle of user whose role is being edite
 #' @param type new authorization type for user [admin, reviewer, user]
 editAuthorization
 
 #' @post /submitIssue
 #' @param title string title of task
-#' @param author handle of author submitting task
+#' @param user handle of author submitting task
 #' @param body string of description
 #' @param impact string of impact
 #' @param timeline string of how long to expect
@@ -55,7 +69,7 @@ submitIssue
 #' @param token
 #' @param id
 #' @param status
-#' @param approver
+#' @param user approver
 #' @param note
 #' @param complexity
 #' @param priority
@@ -64,26 +78,32 @@ judgeIssue
 
 #' @get /issues
 #' @param status
+#' @param user
+#' @param token
 issues
 
 #' @get /myIssues
 #' @param user
+#' @param token
 myIssues
 
 #' @get /tasks
 #' @param user
+#' @param token
 serveTasks
 
 #' @get /follow
 #' @param issue_id
-#' @param username
+#' @param user
 #' @param status
+#' @param token
 followTasks
 
 #' @get /vote
 #' @param issue_id
-#' @param username
+#' @param user
 #' @param vote
+#' @param token
 voteTasks
 
 #' @get /pkgs

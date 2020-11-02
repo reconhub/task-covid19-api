@@ -23,6 +23,15 @@ sanityCheck <- function(){
   return('sanity check')
 }
 
+validateUser <- function(login, token){
+  # 4ae7cfdc86436ba2f2a801e11cb63b9db7a253b5
+  if(is.null(login) | is.null(token)) return(F)
+  tkn <- paste('token', token)
+  res <- httr::GET("https://api.github.com/user", httr::add_headers(Authorization = tkn))
+  validation <- httr::content(res)$login == login
+  validation
+}
+
 base_scores <- c(
   "Priority Low" = 10,
   "Priority Medium" = 30,

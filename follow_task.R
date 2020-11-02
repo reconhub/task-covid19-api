@@ -49,7 +49,7 @@ parseIssues <- function(dta) {
   dplyr::bind_rows(tasks)
 }
   
-serveTasks <- function(user=NA){
+serveTasks <- function(user=NA, token){
   db_con <- connect2DB()
   
   res <- httr::GET('https://api.github.com/repos/reconhub/tasks/issues')
@@ -92,13 +92,13 @@ serveTasks <- function(user=NA){
 }
   
 #last_update isn't updating...
-followTasks <- function(issue_id, username, status){
+followTasks <- function(issue_id, user, status){
   db_con <- connect2DB()
   
   qry <- paste0(
     "INSERT INTO following(issue_id, username, status) ",
     "VALUES ('", 
-    paste(c(issue_id, username, status),  collapse = "', '"),
+    paste(c(issue_id, user, status),  collapse = "', '"),
     "') ",
     "ON CONFLICT (issue_id, username) DO UPDATE ",
     "SET status = '", status, "' ",

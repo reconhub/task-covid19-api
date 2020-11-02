@@ -88,10 +88,10 @@ removeGitCollab <- function(token, username){
 # reviewer can approve issues and assign issues
 # admin same as reviewer but can add new reviewer admin
 # user is default...push priveledges
-addAuthorization <- function(token, admin, user, type){
+addAuthorization <- function(token, user, login, type){
   db_con <- connect2DB()
   
-  is_recorded <- nrow(pullAuthorization(db_con, user))
+  is_recorded <- nrow(pullAuthorization(db_con, login))
   
   if(is_recorded != 0){
     return("User already exists.")
@@ -100,7 +100,7 @@ addAuthorization <- function(token, admin, user, type){
   qry <- paste0(
     "INSERT INTO admin(username, type, approver) ",
     "VALUES ('", 
-    paste(stringr::str_replace_all(c(user, type, admin), "'", "''"),  collapse = "', '"),
+    paste(stringr::str_replace_all(c(login, type, user), "'", "''"),  collapse = "', '"),
     "') RETURNING *;"
   )
   
@@ -108,20 +108,20 @@ addAuthorization <- function(token, admin, user, type){
 
   RPostgres::dbDisconnect(db_con)
   
-  addGitCollab(token, user, type)
+  addGitCollab(token, login, type)
   
   return("User successfully added.")
 }
 
-editAuthorization <- function(token, admin, user, type){
+editAuthorization <- function(token, user, login, type){
   db_con <- connect2DB()
   
   qry <- paste0(
     "UPDATE admin ",
     "SET type = '", type,"', ",
-    "approver = '", admin, "', ",
+    "approver = '", user, "', ",
     "last_update = current_timestamp ",
-    "WHERE username = '", user, "' RETURNING *;"
+    "WHERE username = '", login, "' RETURNING *;"
   )
   
   info <- RPostgres::dbGetQuery(db_con, qry)
@@ -129,15 +129,15 @@ editAuthorization <- function(token, admin, user, type){
   RPostgres::dbDisconnect(db_con)
   
   if(type == 'nothing'){
-    removeGitCollab(token, user)
+    removeGitCollab(token, login)
   } else {
-    addGitCollab(token, user, type)
+    addGitCollab(token, login, type)
   }
   
   return(info)
 }
 
-getAuthorization <- function(user = ""){
+getAuthorization <- function(user = "", token){
   db_con <- connect2DB()
   
   if(user == "" ){
