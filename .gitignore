@@ -3,3 +3,4 @@
 .Renviron
 .DS_Store
 backup/*.csv
+backup/*.sql
