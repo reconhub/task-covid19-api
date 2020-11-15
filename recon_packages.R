@@ -11,10 +11,33 @@
 # RPostgres::dbGetQuery(db_con, "alter table recon_package add last_update timestamp default current_timestamp")
 # RPostgres::dbDisconnect(db_con)
 
-recon_packages <- function(pkg = NA, status = 'approved'){
+pkgAPI <- function(req){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  
+  . <- req$args
+  
+  if(req$REQUEST_METHOD == 'GET'){
+    return(recon_packages(.$pkg, .$status))
+  }
+  
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
+  
+  if(req$REQUEST_METHOD == 'POST'){
+    return(suggestPackages(.$org, .$pkg, .$poc, decoded$login))
+  }
+  
+  if(req$REQUEST_METHOD == 'PUT'){
+    return(editPackages(.$id, .$status, decoded$login))
+  }
+  
+}
+
+recon_packages <- function(pkg = NULL, status = 'approved'){
   db_con <- connect2DB()
   
-  if(is.na(pkg)){
+  if(is.null(pkg)){
     qry <- paste0("SELECT * FROM recon_package WHERE status = '", status, "'")
   } else {
     info <- unlist(stringr::str_split(pkg, '/'))

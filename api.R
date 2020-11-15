@@ -22,8 +22,8 @@ cors <- function(req, res) {
 #' @html
 gitOauth
 
-#' @post /auth
 #' @options /auth
+#' @post /auth
 #' @put /auth
 #' @get /auth
 #' @param login github handle of new user for[POST, PUT]
@@ -35,10 +35,10 @@ authAPI
 getAuthorization
 
 
+#' @options /issue
 #' @post /issue
 #' @put /issue
 #' @get /issue
-#' @options /issue
 #' @param title string title of task [POST]
 #' @param body string of description
 #' @param impact string of impact
@@ -75,30 +75,23 @@ followTasks
 #' @param token
 voteTasks
 
+#' @options /pkgs
+#' @post /pkgs
+#' @put /pkgs
 #' @get /pkgs
-#' @param status
-recon_packages
+#' @param status pending validation, approved, rejected [PUT, GET]
+#' @param org organization of package to suggest for RECON [POST]
+#' @param pkg package name to sugget for recon [POST]
+#' @param poc point of contact to refer queries about package [POST]
+#' @param id id of pkg in db [PUT]
+pkgAPI
 
-#' @post /suggestPkg
-#' @param org
-#' @param pkg
-#' @param poc
-#' @param user
-#' @param token
-suggestPackages
-
-#' @post /editPkg
-#' @param id
-#' @param status
-#' @param user
-#' @param token
-editPackages
 
 #' @serializer unboxedJSON
-#' @post /test
-#' @get /test
-#' @put /test
 #' @options /test
+#' @post /test
+#' @put /test
+#' @get /test
 #' @param test
 #' @param other
 sanityCheck
