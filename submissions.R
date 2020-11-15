@@ -68,18 +68,20 @@ issueAPI <- function(req, res){
   if(req$REQUEST_METHOD == 'OPTIONS'){
     return( 'Successful OPTIONS')
   }
-  
-  if(!validateUser(req$args$user, req$HTTP_AUTHORIZATION)){
+  if(!validateUser(req$HTTP_X_USER, req$HTTP_AUTHORIZATION)){
     res$status <- 401 # Unauthorized
     return(list(error="Authentication required [Matching user name and token]"))
   }
+  if(req$REQUEST_METHOD == "GET"){
+    return(issues(req$args$status))
+  }
   if(req$REQUEST_METHOD == "POST"){
     . <- req$args
-    submitIssue(.$title, .$user, .$token, .$body, .$impact, .$timeline, .$priority, .$complexity, .$assignees, .$repo)
+    return(submitIssue(.$title, .$user, .$token, .$body, .$impact, .$timeline, .$priority, .$complexity, .$assignees, .$repo))
   }
   if(req$REQUEST_METHOD == "PUT"){
     . <- req$args
-    judgeIssue(.$token, .$id, .$status, .$user, .$note, .$complexity, .$priority, .$repo)
+    return(judgeIssue(.$token, .$id, .$status, .$user, .$note, .$complexity, .$priority, .$repo))
   }
 }
 
@@ -197,7 +199,7 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
 }
 
 #' get issues by status
-issues <- function(status, user, token){
+issues <- function(status){
   db_con <- connect2DB()
   
   qry <- paste0("SELECT * FROM submission WHERE status = '", status, "'")

@@ -12,7 +12,7 @@ source('recon_packages.R')
 cors <- function(req, res) {
   res$setHeader("Access-Control-Allow-Origin", "*")
   res$setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
-  res$setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res$setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User')
 
   plumber::forward()
 }
@@ -46,6 +46,7 @@ editAuthorization
 
 #' @post /issue
 #' @put /issue
+#' @get /issue
 #' @options /issue
 #' @param title string title of task [POST]
 #' @param user handle of author submitting task [POST] or approving task  [PUT]
@@ -62,24 +63,6 @@ editAuthorization
 #' @param note not from approver [PUT]
 issueAPI
 
-# submitIssue
-
-#' @post /judgeIssue
-#' @param token
-#' @param id
-#' @param status
-#' @param user approver
-#' @param note
-#' @param complexity
-#' @param priority
-#' @param repo
-judgeIssue
-
-#' @get /issues
-#' @param status
-#' @param user
-#' @param token
-issues
 
 #' @get /myIssues
 #' @param user
