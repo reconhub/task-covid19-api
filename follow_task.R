@@ -49,7 +49,23 @@ parseIssues <- function(dta) {
   dplyr::bind_rows(tasks)
 }
   
-serveTasks <- function(user=NA, token){
+
+indiviualizedTasks <- function(req){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  
+  if(!nchar(req$HTTP_AUTHORIZATION)){
+    res$status <- 401 # Unauthorized
+    return(list(error="Authentication required [Must have valid JWT]"))
+  }
+  
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
+  
+  return(serveTasks(decoded$login))
+}
+
+serveTasks <- function(user=NA){
   db_con <- connect2DB()
   
   res <- httr::GET('https://api.github.com/repos/reconhub/tasks/issues')

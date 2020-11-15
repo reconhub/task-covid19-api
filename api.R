@@ -57,9 +57,11 @@ issueAPI
 myIssues
 
 #' @get /tasks
-#' @param user
-#' @param token
 serveTasks
+
+#' @options /tasks/<users>
+#' @get /tasks/<user>
+indiviualizedTasks
 
 #' @get /follow
 #' @param issue_id
