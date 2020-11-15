@@ -14,16 +14,6 @@ cors <- function(req, res) {
   res$setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
   res$setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
-  # usr <- req$args$user
-  # tkn <- req$args$token
-  # 
-  # if(!is.null(req$args$user)){
-  #   if(!validateUser(usr, tkn)){
-  #     res$status <- 401 # Unauthorized
-  #     return(list(error="Authentication required [Need user name and token]"))
-  #   } 
-  # }
-
   plumber::forward()
 }
 
@@ -55,17 +45,21 @@ getAuthorization
 editAuthorization
 
 #' @post /issue
+#' @put /issue
 #' @options /issue
-#' @param title string title of task
-#' @param user handle of author submitting task
+#' @param title string title of task [POST]
+#' @param user handle of author submitting task [POST] or approving task  [PUT]
 #' @param body string of description
 #' @param impact string of impact
 #' @param timeline string of how long to expect
-#' @param priority Priority_Low, Priority_Medium, Priority_High
-#' @param complexity Complexity_Low, Complexity_Medium, Complexity_High
+#' @param priority Priority_Low, Priority_Medium, Priority_High [POST, PUT]
+#' @param complexity Complexity_Low, Complexity_Medium, Complexity_High [POST, PUT]
 #' @param assignees single string for potential help
-#' @param repo potential repo for task
-#' @param token GitHub user token of person submitting task
+#' @param repo potential repo for task [POST, PUT]
+#' @param token GitHub user token of person submitting task [POST] or approving task [PUT]
+#' @param id ID of task [PUT]
+#' @param status pending validation, approved, or rejected [PUT]
+#' @param note not from approver [PUT]
 issueAPI
 
 # submitIssue

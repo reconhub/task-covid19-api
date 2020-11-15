@@ -68,16 +68,18 @@ issueAPI <- function(req, res){
   if(req$REQUEST_METHOD == 'OPTIONS'){
     return( 'Successful OPTIONS')
   }
+  
+  if(!validateUser(req$args$user, req$HTTP_AUTHORIZATION)){
+    res$status <- 401 # Unauthorized
+    return(list(error="Authentication required [Matching user name and token]"))
+  }
   if(req$REQUEST_METHOD == "POST"){
-    print(req$args$user)
-    print(req$HTTP_AUTHORIZATION)
-    print(!validateUser(req$args$user, req$HTTP_AUTHORIZATION))
-    if(!validateUser(req$args$user, req$HTTP_AUTHORIZATION)){
-      res$status <- 401 # Unauthorized
-      return(list(error="Authentication required [Matching user name and token]"))
-    }
     . <- req$args
     submitIssue(.$title, .$user, .$token, .$body, .$impact, .$timeline, .$priority, .$complexity, .$assignees, .$repo)
+  }
+  if(req$REQUEST_METHOD == "PUT"){
+    . <- req$args
+    judgeIssue(.$token, .$id, .$status, .$user, .$note, .$complexity, .$priority, .$repo)
   }
 }
 
