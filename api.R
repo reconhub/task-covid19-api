@@ -11,16 +11,18 @@ source('recon_packages.R')
 #* @filter cors
 cors <- function(req, res) {
   res$setHeader("Access-Control-Allow-Origin", "*")
-  
-  usr <- req$args$user
-  tkn <- req$args$token
-  
-  if(!is.null(req$args$user)){
-    if(!validateUser(usr, tkn)){
-      res$status <- 401 # Unauthorized
-      return(list(error="Authentication required [Need user name and token]"))
-    } 
-  }
+  res$setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
+  res$setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  # usr <- req$args$user
+  # tkn <- req$args$token
+  # 
+  # if(!is.null(req$args$user)){
+  #   if(!validateUser(usr, tkn)){
+  #     res$status <- 401 # Unauthorized
+  #     return(list(error="Authentication required [Need user name and token]"))
+  #   } 
+  # }
 
   plumber::forward()
 }
@@ -52,7 +54,8 @@ getAuthorization
 #' @param type new authorization type for user [admin, reviewer, user]
 editAuthorization
 
-#' @post /submitIssue
+#' @post /issue
+#' @options /issue
 #' @param title string title of task
 #' @param user handle of author submitting task
 #' @param body string of description
@@ -63,7 +66,9 @@ editAuthorization
 #' @param assignees single string for potential help
 #' @param repo potential repo for task
 #' @param token GitHub user token of person submitting task
-submitIssue
+issueAPI
+
+# submitIssue
 
 #' @post /judgeIssue
 #' @param token
@@ -126,5 +131,10 @@ suggestPackages
 editPackages
 
 #' @serializer unboxedJSON
+#' @post /test
 #' @get /test
+#' @put /test
+#' @options /test
+#' @param test
+#' @param other
 sanityCheck

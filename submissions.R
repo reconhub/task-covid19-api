@@ -64,6 +64,23 @@
 #                     'Priority_Low',
 #                     'Do not know')
 
+issueAPI <- function(req, res){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  if(req$REQUEST_METHOD == "POST"){
+    print(req$args$user)
+    print(req$HTTP_AUTHORIZATION)
+    print(!validateUser(req$args$user, req$HTTP_AUTHORIZATION))
+    if(!validateUser(req$args$user, req$HTTP_AUTHORIZATION)){
+      res$status <- 401 # Unauthorized
+      return(list(error="Authentication required [Matching user name and token]"))
+    }
+    . <- req$args
+    submitIssue(.$title, .$user, .$token, .$body, .$impact, .$timeline, .$priority, .$complexity, .$assignees, .$repo)
+  }
+}
+
 # submit issue for admins to approve
 submitIssue <- function(title,
                         user,
@@ -76,6 +93,8 @@ submitIssue <- function(title,
                         assignees,
                         repo
                         ){
+  
+  
   db_con <- connect2DB()
   print(c(title, user, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "))
   qry <- paste0(

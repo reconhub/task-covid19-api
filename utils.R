@@ -19,7 +19,9 @@ connect2DB <- function(){
   )
 }
 
-sanityCheck <- function(){
+sanityCheck <- function(req){
+  print(req$HTTP_AUTHORIZATION)
+  print(req$REQUEST_METHOD)
   return('sanity check')
 }
 
