@@ -17,32 +17,23 @@ cors <- function(req, res) {
   plumber::forward()
 }
 
-
-
 #' @get /my-oauth
 #' @param code
 #' @html
 gitOauth
 
-#' @post /addAuth
-#' @param token GitHup user token
-#' @param user admin who is submittint a new user
-#' @param login github handle of new user
-#' @param type type of authorization [admin, reviewer, user]
-addAuthorization
-  
+#' @post /auth
+#' @options /auth
+#' @put /auth
 #' @get /auth
+#' @param login github handle of new user for[POST, PUT]
+#' @param type type of authorization [admin, reviewer, user] for [POST, PUT]
+authAPI
+  
+#' @get /auth/<user>/<token>
 #' @serializer unboxedJSON
-#' @param user
-#' @param token
 getAuthorization
 
-#' @post /editAuth
-#' @param token GitHub user token
-#' @param user admin who is edditing user role
-#' @param login github handle of user whose role is being edite
-#' @param type new authorization type for user [admin, reviewer, user]
-editAuthorization
 
 #' @post /issue
 #' @put /issue

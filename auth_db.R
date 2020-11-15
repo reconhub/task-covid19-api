@@ -85,15 +85,43 @@ removeGitCollab <- function(token, username){
   httr::content(postres)
 }
 
+authAPI <- function(req, res){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  
+  if(!nchar(req$HTTP_AUTHORIZATION)){
+    res$status <- 401 # Unauthorized
+    return(list(error="Authentication required [Must have valid JWT]"))
+  }
+  
+  . <- req$args
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
+  
+  if(req$REQUEST_METHOD == 'POST'){
+    return( addAuthorization(decoded$gitToken, decoded$login, .$login, .$type))
+  }
+  
+  if(req$REQUEST_METHOD == 'PUT'){
+    return( editAuthorization(decoded$gitToken, decoded$login, .$login, .$type))
+  }
+  
+  if(req$REQUEST_METHOD == 'GET'){
+    return( getAuthorization("", decoded$gitToken))
+  }
+  
+}
+
 # reviewer can approve issues and assign issues
 # admin same as reviewer but can add new reviewer admin
 # user is default...push priveledges
 addAuthorization <- function(token, user, login, type){
-  db_con <- connect2DB()
   
+  db_con <- connect2DB()
   is_recorded <- nrow(pullAuthorization(db_con, login))
   
   if(is_recorded != 0){
+    RPostgres::dbDisconnect(db_con)
     return("User already exists.")
   }
   
@@ -105,7 +133,6 @@ addAuthorization <- function(token, user, login, type){
   )
   
   info <- RPostgres::dbGetQuery(db_con, qry)
-
   RPostgres::dbDisconnect(db_con)
   
   addGitCollab(token, login, type)
@@ -114,7 +141,6 @@ addAuthorization <- function(token, user, login, type){
 }
 
 editAuthorization <- function(token, user, login, type){
-  db_con <- connect2DB()
   
   qry <- paste0(
     "UPDATE admin ",
@@ -124,8 +150,8 @@ editAuthorization <- function(token, user, login, type){
     "WHERE username = '", login, "' RETURNING *;"
   )
   
+  db_con <- connect2DB()
   info <- RPostgres::dbGetQuery(db_con, qry)
-  
   RPostgres::dbDisconnect(db_con)
   
   if(type == 'nothing'){
