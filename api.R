@@ -49,7 +49,6 @@ editAuthorization
 #' @get /issue
 #' @options /issue
 #' @param title string title of task [POST]
-#' @param user handle of author submitting task [POST] or approving task  [PUT]
 #' @param body string of description
 #' @param impact string of impact
 #' @param timeline string of how long to expect
@@ -57,16 +56,13 @@ editAuthorization
 #' @param complexity Complexity_Low, Complexity_Medium, Complexity_High [POST, PUT]
 #' @param assignees single string for potential help
 #' @param repo potential repo for task [POST, PUT]
-#' @param token GitHub user token of person submitting task [POST] or approving task [PUT]
 #' @param id ID of task [PUT]
 #' @param status pending validation, approved, or rejected [PUT]
 #' @param note not from approver [PUT]
 issueAPI
 
-
-#' @get /myIssues
-#' @param user
-#' @param token
+#' @options /issue/<user>
+#' @get /issue/<user>
 myIssues
 
 #' @get /tasks

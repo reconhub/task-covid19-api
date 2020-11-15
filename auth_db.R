@@ -147,6 +147,7 @@ getAuthorization <- function(user = "", token){
   }
   
   info <- pullAuthorization(db_con, user)
+  RPostgres::dbDisconnect(db_con)
   
   if(nrow(info) <= 0){
     auth <- list(user=user, type = "user")
@@ -154,7 +155,9 @@ getAuthorization <- function(user = "", token){
     auth <- list(user = user ,type = info$type[1])
   }
   
-  RPostgres::dbDisconnect(db_con)
+  jwt <- createJWT(auth$user, auth$type, token)
+  auth$jwt <- jwt
   
   return(auth)
 }
+

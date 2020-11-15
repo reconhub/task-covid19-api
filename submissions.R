@@ -68,20 +68,24 @@ issueAPI <- function(req, res){
   if(req$REQUEST_METHOD == 'OPTIONS'){
     return( 'Successful OPTIONS')
   }
-  if(!validateUser(req$HTTP_X_USER, req$HTTP_AUTHORIZATION)){
+  
+  if(!nchar(req$HTTP_AUTHORIZATION)){
     res$status <- 401 # Unauthorized
-    return(list(error="Authentication required [Matching user name and token]"))
+    return(list(error="Authentication required [Must have valid JWT]"))
   }
+  
   if(req$REQUEST_METHOD == "GET"){
     return(issues(req$args$status))
   }
+  
+  . <- req$args
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
+  
   if(req$REQUEST_METHOD == "POST"){
-    . <- req$args
-    return(submitIssue(.$title, .$user, .$token, .$body, .$impact, .$timeline, .$priority, .$complexity, .$assignees, .$repo))
+    return(submitIssue(.$title, decoded$login, decoded$gitToken, .$body, .$impact, .$timeline, .$priority, .$complexity, .$assignees, .$repo))
   }
   if(req$REQUEST_METHOD == "PUT"){
-    . <- req$args
-    return(judgeIssue(.$token, .$id, .$status, .$user, .$note, .$complexity, .$priority, .$repo))
+    return(judgeIssue(decoded$gitToken, .$id, .$status, decoded$login, .$note, .$complexity, .$priority, .$repo))
   }
 }
 
@@ -211,16 +215,30 @@ issues <- function(status){
   return(statuses)
 }
 
-myIssues <- function(user, token){
+myIssues <- function(req){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  
+  if(!nchar(req$HTTP_AUTHORIZATION)){
+    res$status <- 401 # Unauthorized
+    return(list(error="Authentication required [Must have valid JWT]"))
+  }
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
+  
+  if(decoded$login != req$args$user){
+    res$status <- 403 # Unauthorized
+    return(list(error="Login and desired user info don't match."))
+  }
+
   db_con <- connect2DB()
+  qry <- paste0("SELECT * FROM submission WHERE author = '", req$args$user, "'")
   
-  qry <- paste0("SELECT * FROM submission WHERE author = '", user, "'")
-  
-  statuses <- RPostgres::dbGetQuery(db_con, qry)
+  submissions <- RPostgres::dbGetQuery(db_con, qry)
   
   RPostgres::dbDisconnect(db_con)
   
-  return(statuses)
+  return(submissions)
 }
 
 postIssue <- function(token,title, body, priority, complexity, assignees){
