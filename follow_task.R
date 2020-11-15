@@ -113,19 +113,30 @@ serveTasks <- function(user=NA){
 }
   
 #last_update isn't updating...
-followTasks <- function(issue_id, user, status){
-  db_con <- connect2DB()
+followTasks <- function(req, res){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  
+  if(!nchar(req$HTTP_AUTHORIZATION)){
+    res$status <- 401 # Unauthorized
+    return(list(error="Authentication required [Must have valid JWT]"))
+  }
+  
+  . <- req$args
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
   
   qry <- paste0(
     "INSERT INTO following(issue_id, username, status) ",
     "VALUES ('", 
-    paste(c(issue_id, user, status),  collapse = "', '"),
+    paste(c(.$issue_id, decoded$login, .$status),  collapse = "', '"),
     "') ",
     "ON CONFLICT (issue_id, username) DO UPDATE ",
-    "SET status = '", status, "' ",
+    "SET status = '", .$status, "' ",
     "RETURNING *;"
   )
   
+  db_con <- connect2DB()
   following <- RPostgres::dbGetQuery(db_con, qry)
   RPostgres::dbDisconnect(db_con)
   return(following)

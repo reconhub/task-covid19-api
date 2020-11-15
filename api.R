@@ -63,18 +63,16 @@ serveTasks
 #' @get /tasks/<user>
 indiviualizedTasks
 
-#' @get /follow
-#' @param issue_id
-#' @param user
-#' @param status
-#' @param token
+#' @options /follow
+#' @put /follow
+#' @param issue_id id of issue/task to follow [PUT]
+#' @param status Boolean true, false [PUT]
 followTasks
 
-#' @get /vote
-#' @param issue_id
-#' @param user
-#' @param vote
-#' @param token
+#' @options /vote
+#' @put /vote
+#' @param issue_id id of issue/task to follow [PUT]
+#' @param vote up, down, or none [PUT]
 voteTasks
 
 #' @options /pkgs

@@ -54,8 +54,6 @@ score_card = c(
 updateVoteTable <- function(issue_id, username, vote){
   if(!vote %in% names(score_card)) return('Please choose appropriate vote')
   
-  db_con <- connect2DB()
-  
   qry <- paste0(
     "INSERT INTO votes(issue_id, username, vote) ",
     "VALUES ('", 
@@ -66,6 +64,7 @@ updateVoteTable <- function(issue_id, username, vote){
     "RETURNING *;"
   )
   
+  db_con <- connect2DB()
   votes <- RPostgres::dbGetQuery(db_con, qry)
   RPostgres::dbDisconnect(db_con)
   return(votes)
@@ -111,27 +110,39 @@ changeRankScore <- function(issue_id, delta){
   return(updated_issue)
 }
 
-voteTasks <- function(issue_id, user, vote){
-  db_con <- connect2DB()
-  if(!vote %in% names(score_card)) return('Please choose appropriate vote')
+voteTasks <- function(req, res){
+  if(req$REQUEST_METHOD == 'OPTIONS'){
+    return( 'Successful OPTIONS')
+  }
+  
+  if(!nchar(req$HTTP_AUTHORIZATION)){
+    res$status <- 401 # Unauthorized
+    return(list(error="Authentication required [Must have valid JWT]"))
+  }
+  
+  . <- req$args
+  decoded <- readJWT(req$HTTP_AUTHORIZATION)
+  
+  if(!.$vote %in% names(score_card)) return('Please choose appropriate vote')
   
   qry_orig <- paste0(
     "SELECT * FROM votes WHERE issue_id = ",
-    issue_id,
+    .$issue_id,
     " AND username = '",
-    user, 
+    decoded$login, 
     "'"
   )
   
+  db_con <- connect2DB()
   originalScore <- RPostgres::dbGetQuery(db_con, qry_orig)$vote
   originalScore <- ifelse(length(originalScore), originalScore, 0)
   
-  newVote <- updateVoteTable(issue_id, user, vote)
+  newVote <- updateVoteTable(.$issue_id, decoded$login, .$vote)
   
   #necessary if thumbs up to thumbs down delta will be |10| not |5|
   delta <- newVote$vote - originalScore
   
-  newRank <- changeRankScore(issue_id, delta)
+  newRank <- changeRankScore(.$issue_id, delta)
   
   qry_max_score <- paste0(
     "SELECT score FROM rank_score ",
@@ -139,7 +150,7 @@ voteTasks <- function(issue_id, user, vote){
   )
   
   maxScore <- RPostgres::dbGetQuery(db_con, qry_max_score)$score[1]
-  print(maxScore)
+
   RPostgres::dbDisconnect(db_con)
   return(list(newRank = newRank, newVote = newVote, maxScore = maxScore))
 }
