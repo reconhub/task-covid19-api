@@ -33,7 +33,7 @@ autoFillUser <- function(db_con,token, admin, user){
     return(FALSE)
   } 
   confirm <- addAuthorization(token, admin, user, 'user')
-  print(confirm)
+  # print(confirm)
   return(TRUE)
 }
 
@@ -52,36 +52,36 @@ addGitCollab <- function(token, username, type){
   # }
   
   bdy <- jsonlite::toJSON(list(permission = permission), auto_unbox = T)
-  print(bdy)
+  # print(bdy)
   
   url = paste0("https://api.github.com/repos/", "reconhub", "/", "tasks", "/collaborators/", username)
-  print(url)
+  # print(url)
   
   tkn = paste('token', token)
 
   config <- httr::add_headers(Authorization = tkn, Accept = "application/vnd.github.v3+json")
-  print(config)
+  # print(config)
   
   postres <- httr::PUT(url,
                        config = config,
                        body = bdy)
   
-  print(postres)
-  print(httr::content(postres))
+  # print(postres)
+  # print(httr::content(postres))
   httr::content(postres)
 }
 
 removeGitCollab <- function(token, username){
   url = paste0("https://api.github.com/repos/", "reconhub", "/", "tasks", "/collaborators/", username)
-  print(url)
+  # print(url)
   
   tkn = paste('token', token)
   config <- httr::add_headers(Authorization = tkn, Accept = "application/vnd.github.v3+json")
   
   postres <- httr::DELETE(url, config = config)
 
-  print(postres)
-  print(httr::content(postres))
+  # print(postres)
+  # print(httr::content(postres))
   httr::content(postres)
 }
 

@@ -104,7 +104,7 @@ submitIssue <- function(title,
   
   
   db_con <- connect2DB()
-  print(c(title, user, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "))
+  # # print(c(title, user, token, body, impact, timeline, priority, complexity, assignees, repo, "pending validation", " "))
   qry <- paste0(
     "INSERT INTO submission(title, author, token, body, impact, timeline, priority, complexity, assignees, repo, status, note) ",
     "VALUES ('", 
@@ -167,7 +167,7 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
     
     gitRes <- postIssue(token, info$info$title[1], bdy, info$info$priority[1], info$info$complexity[1], info$info$assignees[1])
     
-    print(httr::status_code(gitRes))
+    # print(httr::status_code(gitRes))
     # #if attempt to submit issue with original author fails
     # #then submit issue with approver
     # if(httr::status_code(gitRes) != 201){
@@ -176,7 +176,7 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
     #   print(token)
     # }
 
-    print(gitRes)
+    # print(gitRes)
     
     info$gitRes <- httr::content(gitRes)
     
@@ -187,8 +187,8 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
       "WHERE id = ", id," RETURNING *;"
     )
     
-    print('update url')
-    print(qry)
+    # print('update url')
+    # print(qry)
     
     
     
@@ -245,7 +245,7 @@ postIssue <- function(token,title, body, priority, complexity, assignees){
   #eventually assign task to assigned repos, but for now we will use reconhub/tasks
   owner = "reconhub"
   repo = "tasks"
-  print('postIssue')
+  # print('postIssue')
   
   bdy <- list(title = title, body = body, labels = c(priority, complexity))
   

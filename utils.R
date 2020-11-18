@@ -21,8 +21,9 @@ connect2DB <- function(){
 }
 
 sanityCheck <- function(req){
-  print(req$HTTP_AUTHORIZATION)
-  print(req$REQUEST_METHOD)
+  # print(req$HTTP_AUTHORIZATION)
+  # print(req$REQUEST_METHOD)
+  # print(ls(req))
   return('sanity check')
 }
 
@@ -38,7 +39,7 @@ readJWT <- function(jwt){
 
 validateUser <- function(login, jwt){
   # 4ae7cfdc86436ba2f2a801e11cb63b9db7a253b5
-  print(paste('jwt', jwt))
+  # print(paste('jwt', jwt))
   if(is.null(login) | is.null(jwt)) return(F)
   decoded <- readJWT(jwt)
   validation <- decoded$login == login
