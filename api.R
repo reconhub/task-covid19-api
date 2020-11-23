@@ -55,6 +55,7 @@ issueAPI
 
 #' @options /issue/<user>
 #' @get /issue/<user>
+#' @put /issue/<user>
 myIssues
 
 #' @get /tasks

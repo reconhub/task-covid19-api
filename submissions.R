@@ -190,10 +190,8 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
     # print('update url')
     # print(qry)
     
-    
-    
     info$info <- RPostgres::dbGetQuery(db_con, qry)
-
+    
     info$rank <- setRankScore(info$gitRes$id, gsub('_', ' ', priority))
   }
   
@@ -224,6 +222,8 @@ myIssues <- function(req){
     res$status <- 401 # Unauthorized
     return(list(error="Authentication required [Must have valid JWT]"))
   }
+  
+  . <- req$args
   decoded <- readJWT(req$HTTP_AUTHORIZATION)
   
   if(decoded$login != req$args$user){
@@ -231,14 +231,43 @@ myIssues <- function(req){
     return(list(error="Login and desired user info don't match."))
   }
 
+  
+  if(req$REQUEST_METHOD == 'GET'){
+    return(getMyIssue(.$user))
+  }
+  
+  if(req$REQUEST_METHOD == 'PUT'){
+    return(editMyIssue(.$title, .$complexity, .$priority, .$repo, .$body, .$impact, .$id))
+  }
+}
+
+getMyIssue <- function(user){
   db_con <- connect2DB()
-  qry <- paste0("SELECT * FROM submission WHERE author = '", req$args$user, "'")
-  
+  qry <- paste0("SELECT * FROM submission WHERE author = '", user, "'")
   submissions <- RPostgres::dbGetQuery(db_con, qry)
+  RPostgres::dbDisconnect(db_con)
+  return(submissions)
+}
+
+editMyIssue <- function(title, complexity, priority, repo, body, impact, id){
+  db_con <- connect2DB()
+  qry <- paste0(
+    "UPDATE submission ",
+    "SET title = '", stringr::str_replace_all(title, "'", "''"), "', ",
+    "complexity = '", complexity, "', ",
+    "priority = '", priority, "', ",
+    "repo = '", repo, "', ",
+    "body = '", stringr::str_replace_all(body, "'", "''"), "', ",
+    "impact = '", stringr::str_replace_all(impact, "'", "''"), "', ",
+    "last_update = current_timestamp ",
+    "WHERE id = ", id," RETURNING *;"
+  )
   
+  info <- RPostgres::dbGetQuery(db_con, qry)
+  info <- list(info = info)
   RPostgres::dbDisconnect(db_con)
   
-  return(submissions)
+  return(info)
 }
 
 postIssue <- function(token,title, body, priority, complexity, assignees){
@@ -262,3 +291,4 @@ postIssue <- function(token,title, body, priority, complexity, assignees){
   
   return(postres)
 }
+
