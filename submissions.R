@@ -69,7 +69,7 @@ issueAPI <- function(req, res){
     return( 'Successful OPTIONS')
   }
   
-  if(!nchar(req$HTTP_AUTHORIZATION)){
+  if(is.null(req$HTTP_AUTHORIZATION)){
     res$status <- 401 # Unauthorized
     return(list(error="Authentication required [Must have valid JWT]"))
   }
@@ -144,7 +144,7 @@ judgeIssue <- function(token, id, status, user, note, complexity, priority, repo
     rep_info <- info$info$repo[1]
   } else {
     rep_info <- recon_packages(pkg = info$info$repo[1])
-    rep_info <- paste0('https://github.com/', info$info$repo[1], ' | @', rep_info$poc)
+    rep_info <- paste0('https://github.com/', info$info$repo[1], ' | @', rep_info$poc[1])
   }
     
     paste0('github.com/', info$info$repo[1])
@@ -226,7 +226,8 @@ myIssues <- function(req){
   . <- req$args
   decoded <- readJWT(req$HTTP_AUTHORIZATION)
   
-  if(decoded$login != req$args$user){
+  
+  if(!((decoded$login == .$user) | (decoded$auth == "admin"))){
     res$status <- 403 # Unauthorized
     return(list(error="Login and desired user info don't match."))
   }
