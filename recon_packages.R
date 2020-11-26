@@ -41,7 +41,7 @@ recon_packages <- function(pkg = NULL, status = 'approved'){
     qry <- paste0("SELECT * FROM recon_package WHERE status = '", status, "'")
   } else {
     info <- unlist(stringr::str_split(pkg, '/'))
-    qry <- paste0("SELECT * FROM recon_package WHERE org = '", info[1], "' AND repo = '", info[2], "'")
+    qry <- paste0("SELECT * FROM recon_package WHERE org = '", info[1], "' AND repo = '", info[2], "' AND status = '", status, "'")
   }
   
   dta <- RPostgres::dbGetQuery(db_con, qry)
